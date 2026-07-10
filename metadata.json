@@ -1,0 +1,6 @@
+{
+  "name": "WebSuccessGo",
+  "description": "A premium SaaS-style website development marketplace. Browse templates, choose plans, submit business requirements, pay, and track your website build progress.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -960,9 +960,6 @@ export default function Home() {
             <p className="font-semibold text-zinc-400">
               © 2026 WebSuccessGo. All Rights Reserved.
             </p>
-            <p>
-              Powered by Next.js, Framer Motion, and Gemini Advanced Website Planner.
-            </p>
           </div>
         </div>
       </footer>

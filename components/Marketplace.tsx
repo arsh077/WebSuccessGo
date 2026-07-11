@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { Eye, Check, ShoppingBag, Laptop, Tablet, Smartphone, Sparkles } from 'lucide-react';
-import { Template } from '@/lib/db';
+import { Template } from '@/lib/firebase/types';
 
 interface MarketplaceProps {
   templates: Template[];

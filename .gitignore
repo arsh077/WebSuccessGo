@@ -5,3 +5,7 @@ coverage/
 *.log
 .env*
 !.env.example
+# Runtime database — contains user data and should not be committed
+data/db.json
+tsconfig.tsbuildinfo
+

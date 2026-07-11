@@ -28,7 +28,14 @@ import Marketplace from '@/components/Marketplace';
 import OrderFlow from '@/components/OrderFlow';
 import Tracking from '@/components/Tracking';
 import AdminDashboard from '@/components/AdminDashboard';
-import { Template, Portfolio as PortfolioItem, Order, Payment } from '@/lib/db';
+import { Template, Portfolio as PortfolioItem, Order, Payment } from '@/lib/firebase/types';
+import { auth } from '@/lib/firebase/client';
+import {
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged
+} from 'firebase/auth';
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState<'landing' | 'portfolio' | 'marketplace' | 'pricing' | 'order' | 'track' | 'admin'>('landing');
@@ -53,20 +60,27 @@ export default function Home() {
   const [registerName, setRegisterName] = useState('');
   const [registerPhone, setRegisterPhone] = useState('');
 
+  // Helper to fetch authorization header
+  const getAuthHeaders = async (): Promise<Record<string, string>> => {
+    if (!auth.currentUser) return {};
+    try {
+      const token = await auth.currentUser.getIdToken();
+      return { Authorization: `Bearer ${token}` };
+    } catch {
+      return {};
+    }
+  };
+
   // Initial Data Fetch
   const fetchData = async () => {
     try {
-      const headers: any = {};
-      if (session) {
-        headers['x-requester-role'] = session.role;
-        headers['x-requester-email'] = session.email;
-      }
+      const authHeaders = await getAuthHeaders();
 
       const [resTpl, resPort, resOrd, resPay] = await Promise.all([
         fetch('/api/templates'),
         fetch('/api/portfolio'),
-        fetch('/api/orders', { headers }),
-        fetch('/api/payments', { headers }),
+        fetch('/api/orders', { headers: authHeaders }),
+        fetch('/api/payments', { headers: authHeaders }),
       ]);
 
       const dataTpl = await resTpl.json();
@@ -78,27 +92,44 @@ export default function Home() {
       if (dataPort.portfolio) setPortfolio(dataPort.portfolio);
       if (dataOrd.orders) setOrders(dataOrd.orders);
       if (dataPay.payments) setPayments(dataPay.payments);
-    } catch (err) {
-      console.error('Failed to load server data:', err);
+    } catch (_err) {
+      // Do not log raw errors to the console in production
     }
   };
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect, react-hooks/exhaustive-deps
     fetchData();
   }, [session]);
 
-  // Load session from localStorage if available
+  // Firebase Auth Observer
   useEffect(() => {
-    const saved = localStorage.getItem('wsg_session');
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        setTimeout(() => setSession(parsed), 0);
-      } catch (e) {
-        localStorage.removeItem('wsg_session');
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser: any) => {
+      if (firebaseUser) {
+        try {
+          const token = await firebaseUser.getIdToken();
+          const res = await fetch('/api/auth', {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          const data = await res.json();
+          if (data.success && data.user) {
+            setSession(data.user);
+          } else {
+            setSession({
+              id: firebaseUser.uid,
+              email: firebaseUser.email,
+              name: '',
+              phone: '',
+              role: 'customer'
+            });
+          }
+        } catch {
+          setSession(null);
+        }
+      } else {
+        setSession(null);
       }
-    }
+    });
+    return () => unsubscribe();
   }, []);
 
   // Login handler
@@ -106,25 +137,10 @@ export default function Home() {
     e.preventDefault();
     setAuthError('');
     try {
-      const res = await fetch('/api/auth', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'login',
-          email: authEmail,
-          password: authPassword,
-        }),
-      });
-      const data = await res.json();
-      if (res.ok && data.success) {
-        setSession(data.user);
-        localStorage.setItem('wsg_session', JSON.stringify(data.user));
-        setAuthPassword('');
-      } else {
-        setAuthError(data.error || 'Login failed');
-      }
-    } catch (err) {
-      setAuthError('Server authentication failed.');
+      await signInWithEmailAndPassword(auth, authEmail, authPassword);
+      setAuthPassword('');
+    } catch (err: any) {
+      setAuthError(err.message || 'Invalid credentials');
     }
   };
 
@@ -133,157 +149,157 @@ export default function Home() {
     e.preventDefault();
     setAuthError('');
     try {
+      const userCredential = await createUserWithEmailAndPassword(auth, authEmail, authPassword);
+      const token = await userCredential.user.getIdToken();
+      // Sync user profile to Firestore `/users`
       const res = await fetch('/api/auth', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
         body: JSON.stringify({
-          action: 'register',
-          email: authEmail,
-          password: authPassword,
           name: registerName,
           phone: registerPhone,
-        }),
+        })
       });
       const data = await res.json();
       if (res.ok && data.success) {
         setSession(data.user);
-        localStorage.setItem('wsg_session', JSON.stringify(data.user));
         setAuthPassword('');
         setRegisterName('');
         setRegisterPhone('');
       } else {
-        setAuthError(data.error || 'Registration failed');
+        setAuthError(data.error || 'Registration profile sync failed');
       }
-    } catch (err) {
-      setAuthError('Server registration failed.');
+    } catch (err: any) {
+      setAuthError(err.message || 'Server registration failed.');
     }
   };
 
-  const handleLogout = () => {
-    setSession(null);
-    localStorage.removeItem('wsg_session');
-    setActiveTab('landing');
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      setSession(null);
+      setActiveTab('landing');
+    } catch {
+      // Fail silently
+    }
   };
 
   // Order timeline progression callbacks
   const handleUpdateOrder = async (orderId: string, fields: any) => {
     if (!session || session.role !== 'admin') return;
     try {
+      const authHeaders = await getAuthHeaders();
       const res = await fetch(`/api/orders/${orderId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'x-requester-role': 'admin',
+          ...authHeaders,
         },
         body: JSON.stringify(fields),
       });
       if (res.ok) {
         fetchData();
       }
-    } catch (err) {
-      console.error('Failed to update order milestone:', err);
-    }
+    } catch (_err) { /* silent */ }
   };
 
   // Template administrative mutations
   const handleAddTemplate = async (fields: any) => {
     try {
+      const authHeaders = await getAuthHeaders();
       const res = await fetch('/api/templates', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-requester-role': 'admin',
+          ...authHeaders,
         },
         body: JSON.stringify({ action: 'create', ...fields }),
       });
       if (res.ok) fetchData();
-    } catch (e) {
-      console.error(e);
-    }
+    } catch { /* silent */ }
   };
 
   const handleEditTemplate = async (id: string, fields: any) => {
     try {
+      const authHeaders = await getAuthHeaders();
       const res = await fetch('/api/templates', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-requester-role': 'admin',
+          ...authHeaders,
         },
         body: JSON.stringify({ action: 'update', id, ...fields }),
       });
       if (res.ok) fetchData();
-    } catch (e) {
-      console.error(e);
-    }
+    } catch { /* silent */ }
   };
 
   const handleDeleteTemplate = async (id: string) => {
     if (!confirm('Are you sure you want to delete this template?')) return;
     try {
+      const authHeaders = await getAuthHeaders();
       const res = await fetch('/api/templates', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-requester-role': 'admin',
+          ...authHeaders,
         },
         body: JSON.stringify({ action: 'delete', id }),
       });
       if (res.ok) fetchData();
-    } catch (e) {
-      console.error(e);
-    }
+    } catch { /* silent */ }
   };
 
   // Portfolio administrative mutations
   const handleAddPortfolio = async (fields: any) => {
     try {
+      const authHeaders = await getAuthHeaders();
       const res = await fetch('/api/portfolio', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-requester-role': 'admin',
+          ...authHeaders,
         },
         body: JSON.stringify({ action: 'create', ...fields }),
       });
       if (res.ok) fetchData();
-    } catch (e) {
-      console.error(e);
-    }
+    } catch { /* silent */ }
   };
 
   const handleEditPortfolio = async (id: string, fields: any) => {
     try {
+      const authHeaders = await getAuthHeaders();
       const res = await fetch('/api/portfolio', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-requester-role': 'admin',
+          ...authHeaders,
         },
         body: JSON.stringify({ action: 'update', id, ...fields }),
       });
       if (res.ok) fetchData();
-    } catch (e) {
-      console.error(e);
-    }
+    } catch { /* silent */ }
   };
 
   const handleDeletePortfolio = async (id: string) => {
     if (!confirm('Are you sure you want to delete this portfolio item?')) return;
     try {
+      const authHeaders = await getAuthHeaders();
       const res = await fetch('/api/portfolio', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-requester-role': 'admin',
+          ...authHeaders,
         },
         body: JSON.stringify({ action: 'delete', id }),
       });
       if (res.ok) fetchData();
-    } catch (e) {
-      console.error(e);
-    }
+    } catch { /* silent */ }
   };
+
 
   return (
     <div className="min-h-screen bg-[#050505] text-white font-sans antialiased flex flex-col justify-between">

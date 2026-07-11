@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { Search, ExternalLink, Calendar, Layers, Eye, Laptop, ShieldAlert, Check } from 'lucide-react';
-import { Portfolio as PortfolioItem } from '@/lib/db';
+import { Portfolio as PortfolioItem } from '@/lib/firebase/types';
 
 interface PortfolioProps {
   portfolio: PortfolioItem[];

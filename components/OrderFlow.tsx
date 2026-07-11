@@ -17,7 +17,7 @@ import {
   FileSpreadsheet,
   AlertCircle
 } from 'lucide-react';
-import { Template, Order } from '@/lib/db';
+import { Template, Order } from '@/lib/firebase/types';
 
 interface OrderFlowProps {
   templates: Template[];

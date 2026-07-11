@@ -20,7 +20,7 @@ import {
   TrendingUp,
   Briefcase
 } from 'lucide-react';
-import { Order, Template, Portfolio, Payment } from '@/lib/db';
+import { Order, Template, Portfolio, Payment } from '@/lib/firebase/types';
 
 interface AdminDashboardProps {
   orders: Order[];

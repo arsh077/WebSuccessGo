@@ -16,7 +16,8 @@ import {
   Laptop,
   CheckCircle2
 } from 'lucide-react';
-import { Order } from '@/lib/db';
+import { Order } from '@/lib/firebase/types';
+import { auth } from '@/lib/firebase/client';
 
 interface TrackingProps {
   initialOrder: Order | null;
@@ -60,7 +61,14 @@ export default function Tracking({ initialOrder, customerSession }: TrackingProp
     setActiveOrder(null);
 
     try {
-      const res = await fetch(`/api/orders/${orderNumberInput}`);
+      let authHeader = '';
+      if (auth.currentUser) {
+        const token = await auth.currentUser.getIdToken();
+        authHeader = `Bearer ${token}`;
+      }
+      const res = await fetch(`/api/orders/${orderNumberInput}`, {
+        headers: authHeader ? { Authorization: authHeader } : {}
+      });
       const data = await res.json();
 
       if (res.ok && data.order) {
@@ -84,17 +92,25 @@ export default function Tracking({ initialOrder, customerSession }: TrackingProp
     setUpdating(true);
 
     try {
+      // Build Authorization header from Firebase Auth
+      let authHeader = '';
+      if (auth.currentUser) {
+        const token = await auth.currentUser.getIdToken();
+        authHeader = `Bearer ${token}`;
+      }
+
       const res = await fetch(`/api/orders/${activeOrder.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'x-requester-role': 'admin',
+          ...(authHeader ? { Authorization: authHeader } : {}),
         },
         body: JSON.stringify({
           projectStatus: 'Development Started',
           adminNotes: 'Design approved by customer! Coding and development phase initiated.',
         }),
       });
+
 
       const data = await res.json();
       if (data.success && data.order) {

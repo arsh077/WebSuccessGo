@@ -1,6 +1,0 @@
-node_modules/
-.env
-uploads/
-invoices/
-*.log
-.DS_Store

@@ -18,7 +18,9 @@ import {
   LogOut,
   HelpCircle,
   Menu,
-  X
+  X,
+  Eye,
+  EyeOff
 } from 'lucide-react';
 
 // Import modular subviews
@@ -55,6 +57,7 @@ export default function Home() {
   const [session, setSession] = useState<any>(null);
   const [authEmail, setAuthEmail] = useState('');
   const [authPassword, setAuthPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [authError, setAuthError] = useState('');
   const [isRegistering, setIsRegistering] = useState(false);
   const [registerName, setRegisterName] = useState('');
@@ -833,14 +836,27 @@ export default function Home() {
 
                     <div className="space-y-1">
                       <label className="font-bold text-zinc-500 block">Account Password *</label>
-                      <input
-                        type="password"
-                        required
-                        value={authPassword}
-                        onChange={(e) => setAuthPassword(e.target.value)}
-                        placeholder="••••••••"
-                        className="w-full px-3 py-2 border border-zinc-200 rounded-lg text-xs"
-                      />
+                      <div className="relative">
+                        <input
+                          type={showPassword ? 'text' : 'password'}
+                          required
+                          value={authPassword}
+                          onChange={(e) => setAuthPassword(e.target.value)}
+                          placeholder="••••••••"
+                          className="w-full pl-3 pr-10 py-2 border border-zinc-200 rounded-lg text-xs"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="absolute inset-y-0 right-0 pr-3 flex items-center text-zinc-400 hover:text-zinc-600 focus:outline-none cursor-pointer"
+                        >
+                          {showPassword ? (
+                            <EyeOff className="h-4 w-4" />
+                          ) : (
+                            <Eye className="h-4 w-4" />
+                          )}
+                        </button>
+                      </div>
                     </div>
 
                     {authError && (

@@ -62,6 +62,7 @@ export default function Home() {
   const [isRegistering, setIsRegistering] = useState(false);
   const [registerName, setRegisterName] = useState('');
   const [registerPhone, setRegisterPhone] = useState('');
+  const [openLegalModal, setOpenLegalModal] = useState<'terms' | 'privacy' | 'refund' | null>(null);
 
   // Helper to fetch authorization header
   const getAuthHeaders = async (): Promise<Record<string, string>> => {
@@ -920,14 +921,244 @@ export default function Home() {
       </main>
 
       {/* Aesthetic Footer */}
-      <footer className="bg-white border-t border-zinc-200 py-8 text-center text-xs text-zinc-400 space-y-2">
-        <p className="font-medium text-zinc-500">
-          © {new Date().getFullYear()} WebSuccessGo. All rights reserved. Choose. Customize. Pay. Grow.
-        </p>
-        <p className="text-[10px] text-zinc-400">
-          Powered by Next.js, Framer Motion, and Gemini Advanced Website Planner.
-        </p>
+      <footer className="bg-black/40 border-t border-white/5 py-12 text-center text-xs text-zinc-400 space-y-6">
+        <div className="max-w-7xl mx-auto px-4 flex flex-col items-center space-y-6">
+          {/* Footer Branding */}
+          <div className="flex items-center gap-2">
+            <div className="w-6 h-6 rounded-md bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center text-white font-black text-xs">
+              W
+            </div>
+            <span className="font-extrabold text-sm tracking-tight text-white">
+              WebSuccessGo
+            </span>
+          </div>
+
+          {/* Footer Links */}
+          <div className="flex flex-col gap-4 sm:flex-row sm:gap-6 justify-center text-zinc-400 font-semibold">
+            <button
+              onClick={() => setOpenLegalModal('terms')}
+              className="hover:text-[#22D3EE] transition-colors cursor-pointer flex items-center gap-1.5 justify-center"
+            >
+              <span>✉</span> Terms & Conditions
+            </button>
+            <button
+              onClick={() => setOpenLegalModal('privacy')}
+              className="hover:text-[#22D3EE] transition-colors cursor-pointer flex items-center gap-1.5 justify-center"
+            >
+              <span>🤝</span> Privacy Policy
+            </button>
+            <button
+              onClick={() => setOpenLegalModal('refund')}
+              className="hover:text-[#22D3EE] transition-colors cursor-pointer flex items-center gap-1.5 justify-center"
+            >
+              <span>▣</span> Refund Policy
+            </button>
+          </div>
+
+          {/* Copyright info */}
+          <div className="space-y-1.5 text-zinc-500 text-[11px]">
+            <p className="font-semibold text-zinc-400">
+              © 2026 WebSuccessGo. All Rights Reserved.
+            </p>
+            <p>
+              Powered by Next.js, Framer Motion, and Gemini Advanced Website Planner.
+            </p>
+          </div>
+        </div>
       </footer>
+
+      {/* Legal Documents Modal */}
+      <AnimatePresence>
+        {openLegalModal && (
+          <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-[#151820] border border-white/15 rounded-2xl overflow-hidden shadow-2xl max-w-3xl w-full flex flex-col max-h-[85vh]"
+            >
+              {/* Modal Header */}
+              <div className="bg-[#0b0c10] border-b border-white/10 px-6 py-4 flex justify-between items-center text-white">
+                <span className="text-xs font-bold font-mono tracking-wider text-cyan-400 uppercase">
+                  {openLegalModal === 'terms' ? 'Terms & Conditions' : openLegalModal === 'privacy' ? 'Privacy Policy' : 'Refund Policy'}
+                </span>
+                <button
+                  onClick={() => setOpenLegalModal(null)}
+                  className="text-zinc-400 hover:text-white font-bold text-xs px-3 py-1.5 rounded bg-white/5 hover:bg-white/10 transition-colors cursor-pointer"
+                >
+                  Close
+                </button>
+              </div>
+
+              {/* Modal Body (Scrollable) */}
+              <div className="flex-1 overflow-y-auto p-6 md:p-8 text-zinc-300 text-xs md:text-sm leading-relaxed space-y-6 text-left">
+                {openLegalModal === 'terms' && (
+                  <div className="space-y-6">
+                    <h1 className="text-xl font-extrabold text-white pb-2 border-b border-white/10">Terms & Conditions</h1>
+                    <div className="space-y-4">
+                      <h2 className="text-base font-bold text-white">1. Introduction</h2>
+                      <p>Welcome to <strong>WebSuccessGo</strong>. By accessing our website or purchasing our services, you agree to follow these Terms & Conditions. These terms define the rules, responsibilities, and limitations related to our website development services.</p>
+                      
+                      <h2 className="text-base font-bold text-white">2. Website Development Services</h2>
+                      <p>WebSuccessGo provides:</p>
+                      <ul className="list-disc pl-5 space-y-1">
+                        <li>Business Website Development</li>
+                        <li>E-commerce Website Development</li>
+                        <li>Custom Website Design</li>
+                        <li>Landing Pages</li>
+                        <li>Website Maintenance Services</li>
+                        <li>UI/UX Design Services</li>
+                      </ul>
+                      <p>The final website will be developed according to the selected package and requirements submitted by the customer.</p>
+
+                      <h2 className="text-base font-bold text-white">3. Order Process</h2>
+                      <p>The customer must:</p>
+                      <ul className="list-disc pl-5 space-y-1">
+                        <li>Select a website template/package</li>
+                        <li>Provide accurate business details</li>
+                        <li>Submit required content, images, and documents</li>
+                        <li>Complete payment process</li>
+                      </ul>
+                      <p>Project development will start after confirmation of payment and requirement details.</p>
+
+                      <h2 className="text-base font-bold text-white">4. Payment Terms</h2>
+                      <ul className="list-disc pl-5 space-y-1">
+                        <li>50% advance payment is required before starting the project.</li>
+                        <li>Remaining 50% payment must be completed before final website delivery.</li>
+                        <li>Payments made for development services are subject to our refund policy.</li>
+                      </ul>
+
+                      <h2 className="text-base font-bold text-white">5. Project Timeline</h2>
+                      <p>Estimated delivery time depends on:</p>
+                      <ul className="list-disc pl-5 space-y-1">
+                        <li>Website complexity</li>
+                        <li>Client response time</li>
+                        <li>Content availability</li>
+                        <li>Number of revisions</li>
+                      </ul>
+                      <p>Delay caused due to missing information from the client may extend delivery timelines.</p>
+
+                      <h2 className="text-base font-bold text-white">6. Client Responsibilities</h2>
+                      <p>The client is responsible for providing:</p>
+                      <ul className="list-disc pl-5 space-y-1">
+                        <li>Correct business information</li>
+                        <li>Logo and images</li>
+                        <li>Website content</li>
+                        <li>Legal permissions for uploaded materials</li>
+                      </ul>
+                      <p>WebSuccessGo is not responsible for copyright issues related to client-provided content.</p>
+
+                      <h2 className="text-base font-bold text-white">7. Website Ownership</h2>
+                      <p>After complete payment:</p>
+                      <ul className="list-disc pl-5 space-y-1">
+                        <li>Website source files/design ownership will be transferred according to the selected package.</li>
+                        <li>Third-party tools, plugins, themes, or licenses may have separate terms.</li>
+                      </ul>
+
+                      <h2 className="text-base font-bold text-white">8. Revisions Policy</h2>
+                      <p>Clients can request modifications according to their selected package.</p>
+                      <p>Additional changes beyond the agreed scope may require additional charges.</p>
+
+                      <h2 className="text-base font-bold text-white">9. Limitation of Liability</h2>
+                      <p>WebSuccessGo is not responsible for:</p>
+                      <ul className="list-disc pl-5 space-y-1">
+                        <li>Server downtime</li>
+                        <li>Third-party service failures</li>
+                        <li>Domain/hosting issues</li>
+                        <li>Loss caused by unauthorized access</li>
+                      </ul>
+                    </div>
+                  </div>
+                )}
+
+                {openLegalModal === 'privacy' && (
+                  <div className="space-y-6">
+                    <h1 className="text-xl font-extrabold text-white pb-2 border-b border-white/10">Privacy Policy</h1>
+                    <div className="space-y-4">
+                      <h2 className="text-base font-bold text-white">1. Information We Collect</h2>
+                      <p>We may collect:</p>
+                      <ul className="list-disc pl-5 space-y-1">
+                        <li>Name</li>
+                        <li>Email Address</li>
+                        <li>Phone Number</li>
+                        <li>Business Information</li>
+                        <li>Payment Details</li>
+                        <li>Website Requirements</li>
+                      </ul>
+
+                      <h2 className="text-base font-bold text-white">2. Use of Information</h2>
+                      <p>Collected information is used for:</p>
+                      <ul className="list-disc pl-5 space-y-1">
+                        <li>Processing website orders</li>
+                        <li>Communication regarding projects</li>
+                        <li>Providing customer support</li>
+                        <li>Improving our services</li>
+                      </ul>
+
+                      <h2 className="text-base font-bold text-white">3. Payment Security</h2>
+                      <p>All payments are processed through secure payment gateways. WebSuccessGo does not store complete payment card details.</p>
+
+                      <h2 className="text-base font-bold text-white">4. Data Protection</h2>
+                      <p>We take reasonable security measures to protect customer information from unauthorized access.</p>
+
+                      <h2 className="text-base font-bold text-white">5. Third Party Services</h2>
+                      <p>We may use third-party services:</p>
+                      <ul className="list-disc pl-5 space-y-1">
+                        <li>Payment gateways</li>
+                        <li>Hosting providers</li>
+                        <li>Analytics tools</li>
+                        <li>Communication platforms</li>
+                      </ul>
+                      <p>These services have their own privacy policies.</p>
+
+                      <h2 className="text-base font-bold text-white">6. Cookies</h2>
+                      <p>Our website may use cookies to improve user experience and analyze website performance.</p>
+
+                      <h2 className="text-base font-bold text-white">7. Contact</h2>
+                      <p>For privacy-related questions:</p>
+                      <p>Email: <a href="mailto:support@websuccessgo.com" className="text-cyan-400 hover:underline">support@websuccessgo.com</a></p>
+                    </div>
+                  </div>
+                )}
+
+                {openLegalModal === 'refund' && (
+                  <div className="space-y-6">
+                    <h1 className="text-xl font-extrabold text-white pb-2 border-b border-white/10">Refund Policy</h1>
+                    <div className="space-y-4">
+                      <h2 className="text-base font-bold text-white">1. Advance Payment</h2>
+                      <p>The advance payment confirms the project booking and allocation of resources.</p>
+
+                      <h2 className="text-base font-bold text-white">2. Refund Eligibility</h2>
+                      <p>Refund requests may be considered only when:</p>
+                      <ul className="list-disc pl-5 space-y-1">
+                        <li>Project has not been started</li>
+                        <li>No work has been delivered</li>
+                        <li>Request is submitted within applicable conditions</li>
+                      </ul>
+
+                      <h2 className="text-base font-bold text-white">3. Non-Refundable Situations</h2>
+                      <p>Refunds will not be provided for:</p>
+                      <ul className="list-disc pl-5 space-y-1">
+                        <li>Completed work</li>
+                        <li>Delivered designs</li>
+                        <li>Approved templates</li>
+                        <li>Client delays</li>
+                        <li>Change of mind after project commencement</li>
+                      </ul>
+
+                      <h2 className="text-base font-bold text-white">4. Cancellation</h2>
+                      <p>If a client cancels after development has started, the amount paid may be adjusted against completed work.</p>
+
+                      <h2 className="text-base font-bold text-white">5. Contact For Refund Queries</h2>
+                      <p>Email: <a href="mailto:support@websuccessgo.com" className="text-cyan-400 hover:underline">support@websuccessgo.com</a></p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

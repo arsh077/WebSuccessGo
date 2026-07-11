@@ -53,6 +53,7 @@ const ALLOWED_CATEGORIES = new Set([
   'Salon Website Templates',
   'E-commerce Website Templates',
   'Startup Website Templates',
+  'Bike Website Templates',
 ]);
 
 const ALLOWED_PACKAGES = new Set(['Starter', 'Business', 'Premium']);
@@ -131,6 +132,7 @@ Choose the MOST appropriate template category from exactly these options:
 - Salon Website Templates
 - E-commerce Website Templates
 - Startup Website Templates
+- Bike Website Templates
 
 Choose the RECOMMENDED pricing package from exactly these options:
 - Starter (Best for simple local sites)

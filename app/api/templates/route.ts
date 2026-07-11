@@ -44,6 +44,7 @@ const ALLOWED_CATEGORIES = new Set([
   'Salon Website Templates',
   'E-commerce Website Templates',
   'Startup Website Templates',
+  'Bike Website Templates',
 ]);
 
 function sanitizeString(value: unknown, maxLen: number): string {

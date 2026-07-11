@@ -69,6 +69,7 @@ export default function OrderFlow({
     'Salon Website Templates',
     'E-commerce Website Templates',
     'Startup Website Templates',
+    'Bike Website Templates',
   ];
 
   const filteredTemplates = templates.filter(

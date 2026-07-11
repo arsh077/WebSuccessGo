@@ -32,6 +32,7 @@ export default function Marketplace({
     'Salon Website Templates',
     'E-commerce Website Templates',
     'Startup Website Templates',
+    'Bike Website Templates',
   ];
 
   const filteredTemplates = templates.filter((tpl) => {
@@ -198,12 +199,24 @@ export default function Marketplace({
                 </button>
               </div>
 
-              <button
-                onClick={() => setPreviewTpl(null)}
-                className="text-zinc-400 hover:text-white font-bold text-xs px-3 py-1.5 rounded bg-white/5 hover:bg-white/10 transition-colors"
-              >
-                Exit Preview
-              </button>
+              <div className="flex items-center gap-2">
+                {previewTpl.demoURL && (
+                  <a
+                    href={previewTpl.demoURL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-cyan-400 hover:text-cyan-300 font-bold text-xs px-3 py-1.5 rounded bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/20 transition-all flex items-center gap-1 cursor-pointer"
+                  >
+                    Launch Live Demo ↗
+                  </a>
+                )}
+                <button
+                  onClick={() => setPreviewTpl(null)}
+                  className="text-zinc-400 hover:text-white font-bold text-xs px-3 py-1.5 rounded bg-white/5 hover:bg-white/10 transition-colors"
+                >
+                  Exit Preview
+                </button>
+              </div>
             </div>
 
             {/* Core Workspace Body */}

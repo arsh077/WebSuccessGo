@@ -704,6 +704,7 @@ export default function AdminDashboard({
                   <option value="Salon Website Templates">Salon</option>
                   <option value="E-commerce Website Templates">E-commerce</option>
                   <option value="Startup Website Templates">Startup</option>
+                  <option value="Bike Website Templates">Bike</option>
                 </select>
               </div>
 
